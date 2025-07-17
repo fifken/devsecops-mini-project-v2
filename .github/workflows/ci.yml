@@ -1,0 +1,41 @@
+name: DevSecOps Mini Project CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Run NPM Audit (Dependency Scan)
+        run: npm audit --audit-level=high --json || true
+
+      - name: Run Gitleaks Scan (Secrets Detection)
+        uses: zricethezav/gitleaks-action@v2 # Menggunakan v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Ini memastikan Gitleaks memindai seluruh riwayat Git
+          scan-history: true
+          # Gitleaks action v2 secara otomatis akan mencari .gitleaks.toml
+          # di root repo, jadi tidak perlu 'config-path'

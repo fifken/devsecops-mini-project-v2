@@ -1,0 +1,7 @@
+# .gitleaks.toml - Updated for Gitleaks v8+
+# Gitleaks documentation: https://gitleaks.io/docs/config/
+
+[allowlist]
+paths = [
+  '''node_modules/''' # Exclude the entire node_modules directory
+]
