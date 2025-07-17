@@ -11,4 +11,4 @@ module.exports = {
     subtract
 };
 
-const MY_SECRET_API_KEY = "sk_live_thisisafakesecretkey12345"; // Ini adalah rahasia yang disimulasikan!
+const MY_SECRET_API_KEY = "sk_live_thisisafakesecretkey12346"; // Ini adalah rahasia yang disimulasikan!
