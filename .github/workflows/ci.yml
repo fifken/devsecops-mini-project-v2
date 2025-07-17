@@ -42,12 +42,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Diperlukan untuk akses repo jika private
 
-      # Langkah ini menjalankan perintah gitleaks CLI secara langsung.
-      # --no-git akan membuat gitleaks memindai semua file di direktori kerja (setelah fetch-depth: 0),
-      # mengabaikan riwayat Git secara langsung. Ini paling andal untuk deteksi di CI.
-      - name: Execute Gitleaks Full Scan (No Git History Scan)
+      # Langkah ini akan memaksa Gitleaks untuk memindai konten app.js melalui stdin (pipe)
+      # Ini adalah cara paling langsung untuk memastikan Gitleaks memproses konten file.
+      - name: Execute Gitleaks Scan via Pipe
         run: |
-          gitleaks detect --source=. --verbose --redact --no-git --exit-code=1
-        # 'continue-on-error: false' adalah default, tapi ditekankan di sini
-        # untuk memastikan langkah ini menyebabkan pipeline gagal jika leaks ditemukan.
+          cat app.js | gitleaks detect --pipe --redact --verbose --exit-code=1
         continue-on-error: false
