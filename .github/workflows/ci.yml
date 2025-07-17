@@ -34,8 +34,15 @@ jobs:
         uses: zricethezav/gitleaks-action@v2 # Menggunakan v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
           # Ini memastikan Gitleaks memindai seluruh riwayat Git
-          scan-history: true
           # Gitleaks action v2 secara otomatis akan mencari .gitleaks.toml
           # di root repo, jadi tidak perlu 'config-path'
+       - name: Execute Gitleaks Full Scan
+        run: |
+          # Perintah gitleaks ini akan memindai seluruh direktori
+          # dan riwayat git dari awal hingga akhir.
+          # --config=.gitleaks.toml akan otomatis dibaca jika ada di root
+          # --redact menyensor rahasia di output log
+          # --exit-code=1 akan membuat step gagal jika leaks ditemukan
+          gitleaks detect --source=. --verbose --redact --full-history --exit-code=1
+        continue-on-error: false # Pastikan langkah ini gagal jika leaks ditemukan
