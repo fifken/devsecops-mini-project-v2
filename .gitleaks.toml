@@ -1,7 +1,41 @@
-# .gitleaks.toml - Updated for Gitleaks v8+
-# Gitleaks documentation: https://gitleaks.io/docs/config/
+[extend]
+useDefault = true
 
 [allowlist]
+description = "Allowlist for test files"
 paths = [
-  '''node_modules/''' # Exclude the entire node_modules directory
+    '''node_modules/.*''',
+    '''\.git/.*''',
+    '''package-lock\.json'''
 ]
+
+# Custom rules untuk mendeteksi pattern yang lebih spesifik
+[[rules]]
+description = "Generic API Key"
+id = "generic-api-key"
+regex = '''[aA][pP][iI][_-]?[kK][eE][yY].*[=:]\s*['\"][0-9a-zA-Z]{20,}['\"]'''
+tags = ["key", "API"]
+
+[[rules]]
+description = "Database Password"
+id = "database-password"
+regex = '''[pP][aA][sS][sS][wW][oO][rR][dD].*[=:]\s*['\"][^'\"]{8,}['\"]'''
+tags = ["password", "database"]
+
+[[rules]]
+description = "JWT Secret"
+id = "jwt-secret"
+regex = '''[jJ][wW][tT][_-]?[sS][eE][cC][rR][eE][tT].*[=:]\s*['\"][0-9a-zA-Z]{20,}['\"]'''
+tags = ["secret", "JWT"]
+
+[[rules]]
+description = "AWS Access Key"
+id = "aws-access-key"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "AWS"]
+
+[[rules]]
+description = "Simple Secret Pattern"
+id = "simple-secret"
+regex = '''[sS][eE][cC][rR][eE][tT].*[=:]\s*['\"][^'\"]{10,}['\"]'''
+tags = ["secret", "generic"]
