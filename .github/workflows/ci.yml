@@ -28,21 +28,22 @@ jobs:
         run: npm test
 
       - name: Run NPM Audit (Dependency Scan)
+        # '|| true' mencegah pipeline gagal total jika hanya ada warning dari npm audit.
+        # Anda masih bisa melihat hasilnya di log.
         run: npm audit --audit-level=high --json || true
 
-      - name: Run Gitleaks Scan (Secrets Detection)
-        uses: zricethezav/gitleaks-action@v2 # Menggunakan v2
+      # Langkah ini menggunakan gitleaks-action untuk menginstal bitleaks CLI
+      # Gitleaks action v2 tidak menerima 'config-path' atau 'scan-history' sebagai input
+      - name: Setup Gitleaks CLI
+        uses: zricethezav/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Ini memastikan Gitleaks memindai seluruh riwayat Git
-          # Gitleaks action v2 secara otomatis akan mencari .gitleaks.toml
-          # di root repo, jadi tidak perlu 'config-path'
-       - name: Execute Gitleaks Full Scan
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Diperlukan untuk akses repo jika private
+
+      # Langkah ini menjalankan perintah gitleaks CLI secara langsung
+      # untuk memindai seluruh riwayat Git (--full-history)
+      - name: Execute Gitleaks Full Scan
         run: |
-          # Perintah gitleaks ini akan memindai seluruh direktori
-          # dan riwayat git dari awal hingga akhir.
-          # --config=.gitleaks.toml akan otomatis dibaca jika ada di root
-          # --redact menyensor rahasia di output log
-          # --exit-code=1 akan membuat step gagal jika leaks ditemukan
           gitleaks detect --source=. --verbose --redact --full-history --exit-code=1
-        continue-on-error: false # Pastikan langkah ini gagal jika leaks ditemukan
+        # 'continue-on-error: false' adalah default, tapi ditekankan di sini
+        # untuk memastikan langkah ini menyebabkan pipeline gagal jika leaks ditemukan.
+        continue-on-error: false
