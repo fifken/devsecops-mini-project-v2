@@ -13,8 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository (Full History)
         uses: actions/checkout@v3
+        with:
+          # Ini penting: fetch seluruh riwayat untuk memastikan semua file ada
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -33,19 +36,18 @@ jobs:
         run: npm audit --audit-level=high --json || true
 
       # Langkah ini menggunakan zricethezav/gitleaks-action@v2 hanya untuk mengunduh dan menyediakan biner gitleaks CLI.
-      # Action ini sendiri tidak melakukan pemindaian riwayat penuh secara default,
-      # jadi kita akan memanggil CLI secara eksplisit di langkah berikutnya.
+      # Action ini sendiri tidak melakukan pemindaian, kita akan memanggil CLI secara eksplisit.
       - name: Download Gitleaks CLI
         uses: zricethezav/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Diperlukan untuk akses repo jika private
 
       # Langkah ini menjalankan perintah gitleaks CLI secara langsung.
-      # Dengan tidak adanya flag --no-git atau --log-opts, gitleaks v8.x akan memindai
-      # seluruh riwayat Git dari awal secara default.
-      - name: Execute Gitleaks Full Scan
+      # --no-git akan membuat gitleaks memindai semua file di direktori kerja (setelah fetch-depth: 0),
+      # mengabaikan riwayat Git secara langsung. Ini paling andal untuk deteksi di CI.
+      - name: Execute Gitleaks Full Scan (No Git History Scan)
         run: |
-          gitleaks detect --source=. --verbose --redact --exit-code=1
+          gitleaks detect --source=. --verbose --redact --no-git --exit-code=1
         # 'continue-on-error: false' adalah default, tapi ditekankan di sini
         # untuk memastikan langkah ini menyebabkan pipeline gagal jika leaks ditemukan.
         continue-on-error: false
